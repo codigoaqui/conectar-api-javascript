@@ -1,30 +1,29 @@
 let pagina = 1;
-const anterior = document.getElementById('anterior');
-const siguiente = document.getElementById('siguiente');
-/* Ir a la página siguiente */
-siguiente.addEventListener("click", () => {
-    if (pagina < 1000) {
-        pagina ++;
-        cargarPeliculas();
-    } else {
-        alert("No hay más películas");
-    }
+let peliculas = '';
+let ultimaPelicula;
+
+// Crear Observador
+let observador = new IntersectionObserver((entradas, observador) => {
+	entradas.forEach(entrada => {
+		if(entrada.isIntersecting) {
+			pagina++;
+			cargarPeliculas();
+		}
+	});
+}, {
+	rootMargin: '0px 0px 200px 0px',
+	threshold: 1.0
 });
-/* Ir a la página anterior */
-anterior.addEventListener("click", () => {
-    if (pagina > 1) {
-        pagina --;
-        cargarPeliculas();
-    }
-});
+
+
 /* Cargar Lista de Películas */
 const cargarPeliculas = async () => {
 	try {
 		const respuesta = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=5b30518dfd04c3c63a127a28c59dbe35&language=es-MX&page=${pagina}`);
-		console.log(respuesta);
+		// console.log(respuesta);
 		if (respuesta.status === 200) {
 			const datos = await respuesta.json();
-			let peliculas = "";
+
 			datos.results.forEach((pelicula) => {
 				peliculas += `
                     <div class="pelicula">
@@ -35,6 +34,17 @@ const cargarPeliculas = async () => {
             });
             /* Mostrar películas */
 			document.getElementById("contenedor").innerHTML = peliculas;
+
+			if(pagina < 1000) {
+				if(ultimaPelicula) {
+					observador.unobserve(ultimaPelicula);
+				}
+
+				const peliculasEnPantalla = document.querySelectorAll('.contenedor .pelicula');
+				ultimaPelicula = peliculasEnPantalla[peliculasEnPantalla.length - 1];
+				observador.observe(ultimaPelicula)
+			}
+			
 		} else if (respuesta.status === 401) {
 			// console.log("No se encontró la película");
 		} else if (respuesta.status === 404) {

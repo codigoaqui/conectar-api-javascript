@@ -1,3 +1,6 @@
+html {
+	scroll-behavior: smooth;
+}
 * {
 	margin: 0;
 	padding: 0;
@@ -36,6 +39,7 @@ h1 {
 
 .contenedor .pelicula .poster {
 	width: 100%;
+	min-height: 200px;
 	margin-bottom: 10px;
 	border-radius: 15px;
 }
